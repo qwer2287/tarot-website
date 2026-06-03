@@ -1333,11 +1333,16 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ============ INIT ============
-window.addEventListener('DOMContentLoaded', () => {
+function boot() {
   initParticles();
   initSplash();
   recordVisit();
-});
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
 </script>
 </body>
 </html>
