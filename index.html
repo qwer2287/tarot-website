@@ -69,6 +69,16 @@ body {
   font-size: 14px; color: var(--text-muted);
   letter-spacing: 4px;
 }
+.splash-skip {
+  margin-top: 30px;
+  font-size: 12px; color: rgba(160,151,176,0.5);
+  letter-spacing: 3px;
+  animation: splashSkipPulse 3s ease-in-out infinite;
+}
+@keyframes splashSkipPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
 
 @keyframes splashPulse {
   0%, 100% { transform: scale(1); }
@@ -557,6 +567,7 @@ header .subtitle {
     <div class="splash-symbol">🔮</div>
     <div class="splash-quote" id="splash-quote-text"></div>
     <div class="splash-sub">✦ THE WHEEL OF FORTUNE ✦</div>
+    <div class="splash-skip">— 点击任意处跳过 —</div>
   </div>
 </div>
 
@@ -812,9 +823,16 @@ function initSplash() {
   const quote = MYSTICAL_QUOTES[Math.floor(Math.random() * MYSTICAL_QUOTES.length)];
   document.getElementById('splash-quote-text').textContent = quote;
 
-  setTimeout(() => {
-    document.getElementById('splash-overlay').classList.add('fade-out');
-  }, 5000);
+  const overlay = document.getElementById('splash-overlay');
+  let timer = setTimeout(() => {
+    overlay.classList.add('fade-out');
+  }, 3000);
+
+  // Click anywhere to skip
+  overlay.addEventListener('click', () => {
+    clearTimeout(timer);
+    overlay.classList.add('fade-out');
+  });
 }
 
 // ============ TOAST ============
