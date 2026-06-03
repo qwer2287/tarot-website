@@ -1,0 +1,14 @@
+{
+  "name": "tarot-website",
+  "version": "1.0.0",
+  "description": "🔮 Western mystical tarot divination website",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "keywords": ["tarot", "divination", "mystical"],
+  "license": "MIT"
+}

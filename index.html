@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔮 命运之轮 · Wheel of Fortune</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=MedievaSharp&display=swap" rel="stylesheet">
+<style>
+/* ============ CSS RESET & GLOBAL ============ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-deep: #0a0a1a;
+  --bg-mid: #120c2e;
+  --gold: #c9a84c;
+  --gold-light: #e8d48b;
+  --gold-dark: #8b6914;
+  --purple: #6b3fa0;
+  --purple-glow: #9b6fd4;
+  --teal: #00d4aa;
+  --teal-glow: #00ffcc;
+  --red-wine: #8b2252;
+  --parchment: #f4e4c1;
+  --text-muted: #a097b0;
+  --card-width: 110px;
+  --card-height: 170px;
+}
+
+body {
+  font-family: 'Cormorant Garamond', 'SimSun', serif;
+  background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a1a 60%, #050510 100%);
+  color: var(--parchment);
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ============ PARTICLE BACKGROUND ============ */
+#particles-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+
+/* ============ SPLASH OVERLAY ============ */
+#splash-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(ellipse at center, #0d0720 0%, #050510 100%);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999; transition: opacity 1.2s ease-out, visibility 1.2s ease-out;
+}
+#splash-overlay.fade-out { opacity: 0; visibility: hidden; }
+.splash-content {
+  text-align: center;
+  animation: splashPulse 2s ease-in-out infinite;
+}
+.splash-symbol {
+  font-size: 80px; margin-bottom: 30px;
+  animation: splashFloat 3s ease-in-out infinite;
+}
+.splash-quote {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(20px, 4vw, 32px);
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(201,168,76,0.5), 0 0 60px rgba(201,168,76,0.3);
+  max-width: 700px; line-height: 1.8;
+  padding: 0 20px;
+}
+.splash-sub {
+  margin-top: 20px;
+  font-size: 14px; color: var(--text-muted);
+  letter-spacing: 4px;
+}
+
+@keyframes splashPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+@keyframes splashFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+/* ============ HEADER ============ */
+header {
+  position: relative; z-index: 10;
+  text-align: center; padding: 25px 20px 10px;
+}
+header h1 {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(22px, 5vw, 36px);
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(201,168,76,0.4);
+  letter-spacing: 3px;
+}
+header .subtitle {
+  font-size: 13px; color: var(--text-muted);
+  letter-spacing: 6px; margin-top: 5px;
+}
+
+/* ============ ADMIN BUTTON ============ */
+.admin-trigger {
+  position: fixed; bottom: 20px; right: 20px; z-index: 100;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: rgba(107,63,160,0.3);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: var(--gold);
+  font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s;
+  backdrop-filter: blur(5px);
+}
+.admin-trigger:hover {
+  background: rgba(107,63,160,0.6);
+  border-color: var(--gold);
+  box-shadow: 0 0 20px rgba(201,168,76,0.3);
+}
+
+/* ============ MODALS ============ */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(5,5,16,0.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; opacity: 0; visibility: hidden;
+  transition: opacity 0.4s, visibility 0.4s;
+  backdrop-filter: blur(8px);
+}
+.modal-overlay.active { opacity: 1; visibility: visible; }
+
+.modal-box {
+  background: linear-gradient(135deg, #1a1040 0%, #0d0d2b 50%, #150830 100%);
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 16px;
+  padding: 40px 35px;
+  max-width: 480px; width: 90%;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(107,63,160,0.3), 0 0 120px rgba(0,0,0,0.5);
+  position: relative;
+}
+.modal-box h2 {
+  font-family: 'Cinzel Decorative', serif;
+  color: var(--gold);
+  font-size: 24px; margin-bottom: 10px;
+}
+.modal-box .modal-icon { font-size: 40px; margin-bottom: 10px; }
+.modal-box .modal-desc {
+  color: var(--text-muted); font-size: 14px; margin-bottom: 25px;
+}
+
+/* Admin modal input */
+.admin-input-group {
+  display: flex; justify-content: center; margin-bottom: 15px;
+}
+.admin-password-input {
+  width: 100%; max-width: 320px; height: 52px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 10px;
+  text-align: center;
+  font-size: 20px; color: var(--gold);
+  font-family: 'Cinzel', serif;
+  outline: none; letter-spacing: 3px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.admin-password-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 15px rgba(201,168,76,0.3);
+}
+
+.admin-btn {
+  background: linear-gradient(135deg, var(--purple), #4a2080);
+  color: var(--gold);
+  border: 1px solid rgba(201,168,76,0.5);
+  padding: 10px 40px;
+  border-radius: 25px;
+  font-family: 'Cinzel', serif;
+  font-size: 16px; cursor: pointer;
+  margin-top: 15px;
+  transition: all 0.3s;
+  letter-spacing: 2px;
+}
+.admin-btn:hover {
+  background: linear-gradient(135deg, #7b4fb0, #5a3090);
+  box-shadow: 0 0 25px rgba(107,63,160,0.5);
+}
+
+.admin-error {
+  color: #ff4466; font-size: 13px; margin-top: 10px;
+  min-height: 20px;
+}
+.admin-stats {
+  margin-top: 25px; padding-top: 20px;
+  border-top: 1px solid rgba(201,168,76,0.2);
+}
+.admin-stats .count {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 48px; color: var(--gold-light);
+  text-shadow: 0 0 20px rgba(201,168,76,0.5);
+}
+.admin-stats .label {
+  color: var(--text-muted); font-size: 14px; margin-top: 5px;
+}
+
+/* Question modal textarea */
+.question-textarea {
+  width: 100%; min-height: 100px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 12px;
+  padding: 16px; color: var(--parchment);
+  font-size: 16px;
+  font-family: 'Cormorant Garamond', 'SimSun', serif;
+  resize: vertical; outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.question-textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 20px rgba(201,168,76,0.2);
+}
+.question-textarea::placeholder {
+  color: rgba(244,228,177,0.3);
+}
+
+/* ============ MAIN STAGE ============ */
+#main-stage {
+  position: relative; z-index: 5;
+  display: flex; flex-direction: column;
+  align-items: center; min-height: 70vh;
+  padding: 10px 20px 60px;
+}
+
+/* ============ BUTTONS ============ */
+.mystic-btn {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 14px 45px;
+  border-radius: 30px;
+  font-family: 'Cinzel', serif;
+  font-size: 18px; cursor: pointer;
+  letter-spacing: 3px;
+  transition: all 0.4s;
+  position: relative; overflow: hidden;
+  z-index: 10;
+}
+.mystic-btn::before {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+  transition: left 0.5s;
+}
+.mystic-btn:hover::before { left: 100%; }
+.mystic-btn:hover {
+  box-shadow: 0 0 30px rgba(201,168,76,0.4), 0 0 60px rgba(107,63,160,0.2);
+  border-color: var(--gold-light);
+  color: var(--gold-light);
+  transform: translateY(-2px);
+}
+.mystic-btn:disabled {
+  opacity: 0.3; cursor: not-allowed; pointer-events: none;
+}
+
+/* ============ CARD FAN ============ */
+#card-stage {
+  position: relative;
+  width: 100%; max-width: 1000px;
+  min-height: 500px;
+  display: flex; align-items: center; justify-content: center;
+  perspective: 2000px;
+}
+.fan-container {
+  position: relative;
+  width: 700px; height: 500px;
+  margin: 0 auto;
+}
+.fan-card {
+  position: absolute;
+  width: var(--card-width); height: var(--card-height);
+  cursor: pointer;
+  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-style: preserve-3d;
+}
+.fan-card-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+}
+.fan-card.back-face .fan-card-inner {
+  /* shown on back */
+}
+.fan-card-back, .fan-card-front {
+  position: absolute; width: 100%; height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(201,168,76,0.4);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.fan-card-back {
+  background: linear-gradient(135deg, #1a1040, #2a1850, #1a1040);
+  /* intricate pattern using CSS */
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(201,168,76,0.05) 5px, rgba(201,168,76,0.05) 6px),
+    repeating-linear-gradient(-45deg, transparent, transparent 5px, rgba(201,168,76,0.05) 5px, rgba(201,168,76,0.05) 6px),
+    radial-gradient(circle at 30% 30%, rgba(201,168,76,0.1) 0%, transparent 50%),
+    linear-gradient(135deg, #1a1040, #2a1850, #1a1040);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), inset 0 0 40px rgba(107,63,160,0.2);
+}
+.fan-card-back .card-pattern {
+  font-size: 36px; opacity: 0.7;
+  animation: patternGlow 3s ease-in-out infinite;
+}
+.fan-card-back .card-stars {
+  position: absolute;
+  font-size: 8px; color: rgba(201,168,76,0.4);
+  letter-spacing: 2px;
+}
+.fan-card-front {
+  background: linear-gradient(135deg, #f5ecd7, #e8dcc8, #f0e6d0);
+  transform: rotateY(180deg);
+  color: #2a1a0a;
+  padding: 8px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.fan-card-front .card-name-zh {
+  font-family: 'Cinzel', 'SimSun', serif;
+  font-size: 14px; font-weight: 700;
+  color: #3a1a5c;
+  margin-top: 4px;
+}
+.fan-card-front .card-name-en {
+  font-size: 9px; color: #6a4a8c;
+  font-style: italic;
+  margin-top: 2px;
+}
+.fan-card-front .card-symbol {
+  font-size: 36px; margin-bottom: 5px;
+}
+.fan-card-front .card-orientation {
+  font-size: 10px; margin-top: 4px;
+  padding: 2px 8px; border-radius: 10px;
+}
+.fan-card-front .card-orientation.upright {
+  color: #2a7a2a; background: rgba(0,200,0,0.1);
+  border: 1px solid rgba(0,200,0,0.2);
+}
+.fan-card-front .card-orientation.reversed {
+  color: #8b2252; background: rgba(200,0,0,0.1);
+  border: 1px solid rgba(200,0,0,0.2);
+}
+
+@keyframes patternGlow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+/* Card dissolving */
+.fan-card.dissolving {
+  opacity: 0 !important;
+  transform: scale(0.3) !important;
+  filter: blur(10px);
+  pointer-events: none;
+  transition: all 0.8s ease-in !important;
+}
+
+/* ============ SELECTED CARDS AREA ============ */
+#selected-cards-area {
+  display: flex; gap: 40px; justify-content: center;
+  align-items: center; min-height: 300px;
+  margin: 30px 0; flex-wrap: wrap;
+  position: relative; z-index: 20;
+}
+.draw-card {
+  width: calc(var(--card-width) * 1.3);
+  height: calc(var(--card-height) * 1.3);
+  perspective: 1000px;
+  cursor: pointer;
+}
+.draw-card .card-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.draw-card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+.draw-card .card-face {
+  position: absolute; width: 100%; height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.draw-card .card-back {
+  background: linear-gradient(135deg, #1a1040, #2a1850, #1a1040);
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(201,168,76,0.05) 5px, rgba(201,168,76,0.05) 6px),
+    repeating-linear-gradient(-45deg, transparent, transparent 5px, rgba(201,168,76,0.05) 5px, rgba(201,168,76,0.05) 6px),
+    radial-gradient(circle at 30% 30%, rgba(201,168,76,0.15) 0%, transparent 50%),
+    linear-gradient(135deg, #1a1040, #2a1850, #1a1040);
+  border: 2px solid rgba(201,168,76,0.5);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 40px rgba(107,63,160,0.3);
+  font-size: 40px;
+  animation: selectedGlow 2s ease-in-out infinite;
+}
+.draw-card .card-front-face {
+  background: linear-gradient(135deg, #f5ecd7, #e8dcc8, #f0e6d0);
+  transform: rotateY(180deg);
+  border: 2px solid rgba(201,168,76,0.6);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 30px rgba(201,168,76,0.3);
+  padding: 10px; text-align: center; color: #2a1a0a;
+}
+.draw-card .card-front-face .card-symbol { font-size: 42px; }
+.draw-card .card-front-face .card-name-zh {
+  font-family: 'Cinzel', 'SimSun', serif;
+  font-size: 15px; font-weight: 700; color: #3a1a5c; margin-top: 4px;
+}
+.draw-card .card-front-face .card-name-en {
+  font-size: 10px; color: #6a4a8c; font-style: italic;
+}
+.draw-card .card-front-face .card-orientation {
+  font-size: 11px; margin-top: 5px; padding: 3px 10px; border-radius: 12px;
+}
+.draw-card .card-front-face .card-orientation.upright {
+  color: #2a7a2a; background: rgba(0,200,0,0.1); border: 1px solid rgba(0,200,0,0.2);
+}
+.draw-card .card-front-face .card-orientation.reversed {
+  color: #8b2252; background: rgba(200,0,0,0.1); border: 1px solid rgba(200,0,0,0.2);
+}
+.draw-card .card-label {
+  color: var(--gold); font-size: 13px; text-align: center;
+  margin-top: 12px; font-family: 'Cinzel', serif;
+  letter-spacing: 1px;
+}
+
+@keyframes selectedGlow {
+  0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 40px rgba(107,63,160,0.3); }
+  50% { box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 60px rgba(107,63,160,0.5), 0 0 80px rgba(201,168,76,0.2); }
+}
+
+/* ============ READING PANEL ============ */
+#reading-panel {
+  max-width: 800px; width: 90%;
+  margin: 40px auto 60px;
+  padding: 40px;
+  background: linear-gradient(135deg, rgba(26,16,64,0.8), rgba(13,13,43,0.9));
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 16px;
+  position: relative; z-index: 10;
+  display: none;
+  box-shadow: 0 0 40px rgba(107,63,160,0.2);
+}
+#reading-panel.visible { display: block; animation: panelReveal 0.8s ease-out; }
+
+@keyframes panelReveal {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#reading-panel .reading-section { margin-bottom: 30px; }
+#reading-panel .reading-section:last-child { margin-bottom: 0; }
+#reading-panel h3 {
+  font-family: 'Cinzel Decorative', serif;
+  color: var(--gold);
+  font-size: 20px; margin-bottom: 15px;
+  text-align: center;
+}
+#reading-panel .reading-divider {
+  text-align: center; color: var(--purple-glow);
+  font-size: 24px; margin: 25px 0;
+}
+#reading-panel p {
+  line-height: 2; font-size: 17px;
+  color: var(--parchment);
+  text-indent: 2em; margin-bottom: 12px;
+}
+#reading-panel .card-reading {
+  background: rgba(107,63,160,0.1);
+  border-left: 2px solid var(--purple);
+  padding: 15px 20px; margin: 15px 0;
+  border-radius: 0 8px 8px 0;
+}
+#reading-panel .card-reading .card-reading-title {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  font-size: 16px; margin-bottom: 8px;
+}
+#reading-panel .advice-section {
+  background: rgba(201,168,76,0.08);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 12px; padding: 25px;
+  text-align: center;
+}
+
+/* ============ CLOSE BUTTON ============ */
+.close-btn {
+  position: absolute; top: 12px; right: 16px;
+  background: none; border: none;
+  color: var(--text-muted); font-size: 22px;
+  cursor: pointer; transition: color 0.3s;
+}
+.close-btn:hover { color: var(--gold); }
+
+/* ============ TOAST ============ */
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(107,63,160,0.9);
+  color: var(--gold-light);
+  padding: 12px 30px; border-radius: 25px;
+  font-size: 14px; z-index: 9999;
+  border: 1px solid rgba(201,168,76,0.4);
+  opacity: 0; transition: opacity 0.4s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+  :root { --card-width: 70px; --card-height: 110px; }
+  .fan-container { width: 100%; height: 400px; }
+  .draw-card {
+    width: calc(var(--card-width) * 1.3);
+    height: calc(var(--card-height) * 1.3);
+  }
+  #selected-cards-area { gap: 18px; }
+  .modal-box { padding: 25px 20px; }
+  #reading-panel { padding: 25px 20px; }
+}
+@media (max-width: 480px) {
+  :root { --card-width: 55px; --card-height: 85px; }
+  .fan-container { height: 300px; }
+  #selected-cards-area { gap: 10px; }
+  .modal-box { padding: 20px 15px; }
+  .draw-card .card-front-face .card-symbol { font-size: 28px; }
+  .draw-card .card-front-face .card-name-zh { font-size: 11px; }
+  .draw-card .card-front-face .card-name-en { font-size: 8px; }
+}
+
+/* ============ HELP TEXT ============ */
+.help-text {
+  text-align: center; color: var(--text-muted);
+  font-size: 13px; margin-top: 10px;
+  letter-spacing: 1px;
+  z-index: 10; position: relative;
+}
+</style>
+</head>
+<body>
+
+<!-- Particle Canvas -->
+<canvas id="particles-canvas"></canvas>
+
+<!-- Splash Overlay -->
+<div id="splash-overlay">
+  <div class="splash-content">
+    <div class="splash-symbol">🔮</div>
+    <div class="splash-quote" id="splash-quote-text"></div>
+    <div class="splash-sub">✦ THE WHEEL OF FORTUNE ✦</div>
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <h1>🔮 命运之轮 · Wheel of Fortune</h1>
+  <div class="subtitle">✦ TAROT DIVINATION ✦</div>
+</header>
+
+<!-- Main Stage -->
+<div id="main-stage">
+  <p class="help-text" id="help-text">点击下方按钮，开始您的塔罗之旅</p>
+  <button class="mystic-btn" id="shuffle-btn" onclick="startShuffle()">
+    ✧ 开 始 洗 牌 ✧
+  </button>
+
+  <!-- Card Fan Area -->
+  <div id="card-stage"></div>
+
+  <!-- Selected Cards Area -->
+  <div id="selected-cards-area"></div>
+
+  <!-- Reading Panel -->
+  <div id="reading-panel"></div>
+</div>
+
+<!-- Question Modal -->
+<div class="modal-overlay" id="question-modal">
+  <div class="modal-box">
+    <button class="close-btn" onclick="closeQuestionModal()">✕</button>
+    <div class="modal-icon">🌙</div>
+    <h2>向命运提问</h2>
+    <p class="modal-desc">在心中默念您的问题，然后将其写下。命运将透过塔罗牌给予您指引...</p>
+    <textarea class="question-textarea" id="question-input"
+      placeholder="例如：我的事业将会如何发展？"></textarea>
+    <button class="mystic-btn" style="margin-top:20px;font-size:15px;padding:10px 35px;" onclick="confirmQuestion()">
+      ✧ 开 始 抽 牌 ✧
+    </button>
+  </div>
+</div>
+
+<!-- Admin Modal -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal-box" id="admin-modal-content">
+    <!-- Login phase -->
+    <div id="admin-login-phase">
+      <button class="close-btn" onclick="closeAdminModal()">✕</button>
+      <div class="modal-icon">🌑</div>
+      <h2>管理员验证</h2>
+      <p class="modal-desc">请输入管理码以访问后台</p>
+      <div class="admin-input-group">
+        <input type="password" class="admin-password-input" id="admin-code-input"
+          placeholder="请输入管理码" onkeydown="if(event.key==='Enter')adminLogin()">
+      </div>
+      <button class="admin-btn" onclick="adminLogin()">验 证</button>
+      <div class="admin-error" id="admin-error"></div>
+    </div>
+    <!-- Dashboard phase (hidden initially) -->
+    <div id="admin-dashboard-phase" style="display:none;">
+      <button class="close-btn" onclick="closeAdminModal()">✕</button>
+      <div class="modal-icon">👁️</div>
+      <h2>管理员后台</h2>
+      <div class="admin-stats">
+        <div class="count" id="admin-count">—</div>
+        <div class="label">✦ 累计访问人次 ✦</div>
+      </div>
+      <div style="margin-top:15px;font-size:13px;color:var(--text-muted);">
+        <p>管理码验证通过 ✓</p>
+        <p style="margin-top:5px;">网站运行状态：正常</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Trigger Button -->
+<button class="admin-trigger" onclick="openAdminModal()" title="管理员入口">🌑</button>
+
+<script>
+// ============ 78 TAROT CARDS DATA ============
+const TAROT_DECK = [
+  // === MAJOR ARCANA (22) ===
+  { id:0, name:"愚者", nameEn:"The Fool", type:"major", symbol:"🌟", upright:{keywords:["开始","自由","冒险","天真"],meaning:"新的旅程即将开始，您正站在命运的十字路口。愚者代表着无限的潜能与大无畏的精神。这是一张关于信任的牌——信任宇宙会接住纵身一跃的您。无论前方有多少未知，请带着赤子之心前行，因为每一个伟大的故事都始于一次勇敢的跳跃。"}, reversed:{keywords:["鲁莽","犹豫","风险","轻率"],meaning:"您可能正在犹豫不决，或是因为过于冲动而忽略了脚下的风险。逆位的愚者提醒您：盲目的乐观无法取代实际的计划。请先看清脚下的路，再做决定。有时，最大的风险不是前行，而是毫无准备地前行。"}},
+  { id:1, name:"魔术师", nameEn:"The Magician", type:"major", symbol:"🪄", upright:{keywords:["创造","意志","技巧","显化"],meaning:"宇宙的力量正汇集于您的指尖。魔术师代表着将想法转化为现实的能力。您拥有所有必要的工具——智慧、意志、情感与资源。现在正是行动的时刻，集中您的意念，世界将为您让路。您所渴望的，正在等待被创造。"}, reversed:{keywords:["欺骗","操控","滥用","潜力未发"],meaning:"您可能拥有力量却不知如何使用，或是有人正在利用信息不对等来操控局势。逆位的魔术师警示：真正的力量源于纯净的意图。请反思自己的动机，确保您不是在自我欺骗。天赋若不以正道施展，终将成为枷锁。"}},
+  { id:2, name:"女祭司", nameEn:"The High Priestess", type:"major", symbol:"🌙", upright:{keywords:["直觉","潜意识","神秘","智慧"],meaning:"答案不在外界，而在您内心深处。女祭司静坐在知识的殿堂中，守护着潜意识的奥秘。请倾听您内在的声音，那些看似不合逻辑的直觉往往最接近真相。有些答案无法用理性推导，只能以心灵感受。保持静默，答案自会浮现。"}, reversed:{keywords:["压抑","忽视直觉","秘密","肤浅"],meaning:"您可能在压抑自己的直觉，或是过于依赖外界的意见而忽略了内心的声音。逆位的女祭司暗示隐藏的秘密可能即将浮出水面。不要逃避您已经感知到却不愿承认的事实。直面内在的阴影，才能真正获得平静。"}},
+  { id:3, name:"女皇", nameEn:"The Empress", type:"major", symbol:"👑", upright:{keywords:["丰饶","母性","自然","滋养"],meaning:"丰盛正围绕在您身边。女皇象征着生命的繁荣与创造力的绽放。这是一个收获的阶段——您播下的种子正在茁壮成长。请像大地一样敞开自己，接纳美好事物进入您的生活。关注感官的体验，享受生命带来的每一份馈赠。您值得被爱与丰盛包围。"}, reversed:{keywords:["依赖","匮乏","忽视","窒息"],meaning:"您可能正在过度依赖他人，或是在关系中感到窒息。逆位的女皇提醒您：滋养他人之前，请先滋养自己。财务上可能出现暂时的匮乏，但这是让您重新审视自身价值的契机。不要为了取悦他人而透支自己。"}},
+  { id:4, name:"皇帝", nameEn:"The Emperor", type:"major", symbol:"🏛️", upright:{keywords:["权威","秩序","稳定","掌控"],meaning:"秩序与结构是您当前的盟友。皇帝坐拥稳固的王座，提醒您以理性和纪律来面对当下的挑战。建立清晰的规则与边界，将混乱转化为有序。您拥有掌控局面的能力，不要畏惧承担领导的责任。稳扎稳打，步步为营，成功自会到来。"}, reversed:{keywords:["专制","失控","僵化","滥权"],meaning:"权力正在被滥用——可能是您在过度控制他人，也可能是您正受到他人的压迫。逆位的皇帝暗示秩序的崩塌和对权威的反抗。请审视：规则的设立是为了保护还是束缚？适度的灵活比刻板的控制更能持久。"}},
+  { id:5, name:"教皇", nameEn:"The Hierophant", type:"major", symbol:"📿", upright:{keywords:["传统","信仰","导师","指引"],meaning:"寻求智慧的传承与精神的指引。教皇代表着正统的知识体系和灵性导师。现在是向有经验的前辈请教的好时机。遵循既有的规则和传统可以为您带来安全感和社会的认可。在信仰的框架内，您将寻得内心的安宁。"}, reversed:{keywords:["叛逆","挑战传统","教条","盲从"],meaning:"您可能正在挑战传统观念，或者感到被教条所束缚。逆位的教皇鼓励您打破常规，走出自己的路。并非所有的传统都值得遵守——有些规则等您来改写。倾听内心的真理，而非他人的说教。真正的信仰来自于自由的思考。"}},
+  { id:6, name:"恋人", nameEn:"The Lovers", type:"major", symbol:"💕", upright:{keywords:["爱情","和谐","选择","结合"],meaning:"一颗心遇到了另一颗心——这是关于爱与抉择的时刻。恋人牌不仅代表浪漫的关系，更象征着价值观的契合与灵魂的共鸣。您可能正面临一个重要的选择，而这选择将深刻影响您的人生方向。请以爱为指南针，选择与您内心最真实渴望共鸣的道路。"}, reversed:{keywords:["分离","不和谐","背叛","错误选择"],meaning:"关系中的裂痕正在扩大，或是您正陷入价值冲突的困境。逆位的恋人警示：不要因为恐惧孤独而停留在一段消耗您的关系中。在面临重大选择时，请确保您没有被表象迷惑。真正的爱不会让您失去自我。"}},
+  { id:7, name:"战车", nameEn:"The Chariot", type:"major", symbol:"⚔️", upright:{keywords:["胜利","意志力","决心","前进"],meaning:"胜利就在前方，但需要您以钢铁般的意志驾驭内心的对立力量。战车代表着克服障碍、勇往直前的精神。您拥有足够的力量去战胜任何挑战——只要您保持专注，不被左右拉扯。握紧缰绳，目标明确，没有人能阻挡您前进的步伐。"}, reversed:{keywords:["失控","失败","侵略","失衡"],meaning:"您的计划可能正在失控，或是您的攻击性正在伤害身边的人。逆位的战车提醒您：真正的胜利不是碾压对手，而是掌控自己的情绪。如果感到方向迷失，请先停下来调整自己，而非一味地横冲直撞。"}},
+  { id:8, name:"力量", nameEn:"Strength", type:"major", symbol:"🦁", upright:{keywords:["勇气","内在力量","耐心","驯服"],meaning:"真正的力量并非暴力，而是以柔克刚的智慧。您拥有驯服内心野兽的能力——以耐心、慈悲和坚定的信念。面对当前的挑战，无需嘶吼或强迫，内在的平静将为您开辟道路。请相信自己的韧性，您比想象中更加坚强。"}, reversed:{keywords:["脆弱","恐惧","失控","软弱"],meaning:"您可能正在被恐惧所支配，感到自己的力量在流失。逆位的力量牌指出您正在与内心的野兽搏斗而非共处。请停止自我怀疑——力量并未消失，只是暂时被恐惧遮蔽。给自己一些时间恢复，脆弱的另一面是即将涅槃的勇气。"}},
+  { id:9, name:"隐士", nameEn:"The Hermit", type:"major", symbol:"🏮", upright:{keywords:["内省","孤独","智慧","指引"],meaning:"是时候从喧嚣中抽离，走入内心的寂静之地。隐士提着灯，在黑暗中寻找真理。您需要的不是更多的建议，而是一段与自己独处的时光。答案已存在于您心中，只等安静下来才能听见。这段看似孤独的旅程，终将引领您走向更高的智慧。"}, reversed:{keywords:["孤立","孤独","逃避","迷失"],meaning:"孤独正在变成孤立——您可能不是在寻找智慧，而是在逃避世界。逆位的隐士提醒：适度的内省是修行，过度的避世是逃避。请不要因为害怕受伤而拒绝联结。走出您的小屋，他人的温暖不是您修行的障碍。"}},
+  { id:10, name:"命运之轮", nameEn:"Wheel of Fortune", type:"major", symbol:"🎡", upright:{keywords:["命运","转折","运气","循环"],meaning:"命运之轮正在转动！无论您现在身处高峰还是低谷，变化已经来临。这是宇宙的律动——一切都在循环之中。好运正在向您靠近，请做好准备迎接转折。顺势而为，不要抗拒改变，因为这一轮的转动正是您曾经种下的因缘在结果。"}, reversed:{keywords:["厄运","抵抗","停滞","不幸"],meaning:"您可能正在抵抗不可避免的改变，或是一连串的不顺让您对命运失去了信心。但逆位的命运之轮提醒您：轮子不会永远停在底部。当运气不佳时，反思自己是否做了正确的选择，而不是将一切归咎于命运。"}},
+  { id:11, name:"正义", nameEn:"Justice", type:"major", symbol:"⚖️", upright:{keywords:["公正","因果","真相","平衡"],meaning:"真相即将浮出水面，宇宙的因果法则正在运行。正义牌代表着公平的结果——每一个行为都有其对应的后果。如果您曾诚实行事，现在将获得应有的回报。在做出重大决定时，请以客观和理性为准绳。天平不会欺骗任何人。"}, reversed:{keywords:["不公","偏见","逃避责任","失衡"],meaning:"不公平的局面让您感到愤怒，或是在某个决定中您未能保持公正。逆位的正义警示：逃避责任只会让后果更加严重。如果您的权益受到侵害，请勇敢发声。不要为了短期的便利而牺牲长期的正义。"}},
+  { id:12, name:"倒吊人", nameEn:"The Hanged Man", type:"major", symbol:"🪢", upright:{keywords:["牺牲","放手","新视角","暂停"],meaning:"换个角度看世界，您会发现完全不同的风景。倒吊人自愿悬吊，以全新的视角审视人生。当前可能需要您做出某种牺牲，或是暂时停下来等待时机。这不是退步，而是为了更高目标的蓄力。学会放手，有时候最大的力量在于臣服。"}, reversed:{keywords:["停滞","固执","无谓牺牲","拖延"],meaning:"您可能陷入了无谓的牺牲或拖延之中。逆位的倒吊人指出：有些等待并非出于智慧，而是出于恐惧。如果牺牲不能换来成长，那只是自我消耗。请分辨：是换个角度还是在逃避面对？该行动的时候，别再把自己吊着了。"}},
+  { id:13, name:"死神", nameEn:"Death", type:"major", symbol:"💀", upright:{keywords:["结束","转变","重生","放手"],meaning:"一个阶段正在终结，而这正是新生的开始。死神牌并不代表肉体的死亡，而是象征着蜕变与转折。那些不再服务于您的人、事、物正在离开，为新的可能性腾出空间。请不要恐惧结束——它是重生的前奏。让旧的死去，新的才能诞生。"}, reversed:{keywords:["恐惧改变","停滞","腐朽","拒绝结束"],meaning:"您正在拼命抓住已经死去的东西，拒绝让改变发生。逆位的死神揭示了您对结束的恐惧——然而拖着不放手只会让腐烂蔓延。请勇敢地对过去说再见。拖延终结，就是拖延新生。"}},
+  { id:14, name:"节制", nameEn:"Temperance", type:"major", symbol:"🏺", upright:{keywords:["平衡","调和","耐心","中庸"],meaning:"融合与调和是您当下的课题。节制天使将两种不同的液体交融，象征着对立面的和谐统一。请寻找生活的平衡点——工作与休息、付出与接受、理性与情感。不需要极端，中庸之道能带您走得更远。一切恰到好处，才是最高境界。"}, reversed:{keywords:["失衡","过度","缺乏节制","冲突"],meaning:"生活正在失去平衡——您可能在某个领域过度投入而忽略了其他。逆位的节制警示：过犹不及。无论是工作、饮食还是情感，极端都会带来反噬。请停下来重新调整您的节奏，找回内在的和谐。"}},
+  { id:15, name:"恶魔", nameEn:"The Devil", type:"major", symbol:"😈", upright:{keywords:["束缚","欲望","物质主义","阴影"],meaning:"您是否被什么无形的锁链捆绑？恶魔牌揭示的是我们对物质、欲望或关系的执念。重要的不是锁链本身，而是您认为自己无法挣脱的信念。请正视自己的阴影面——那些上瘾的行为、不健康的关系或过度膨胀的欲望。承认束缚的存在，是解脱的第一步。"}, reversed:{keywords:["解脱","觉醒","摆脱","重获自由"],meaning:"您看到了锁链，并准备挣脱！逆位的恶魔是觉醒的象征——您正在从某种束缚中解放自己。成瘾、操控或执念正在失去它们对您的控制力。这需要勇气和决心，但自由的曙光已经出现。坚持这条路，您将重获新生。"}},
+  { id:16, name:"高塔", nameEn:"The Tower", type:"major", symbol:"🗼", upright:{keywords:["崩塌","突变","启示","觉醒"],meaning:"天雷击中了高塔，一切看似坚固的结构正在崩塌。这突如其来的变故令人恐惧，但请记住：倒掉的从来都不是真正的根基，而是建在虚幻之上的假象。这场摧毁是为了让您重新建立更坚实的人生。接受震荡，从废墟中找到真理的火种。"}, reversed:{keywords:["避免灾难","延缓崩塌","恐惧转变"],meaning:"风暴似乎已经过去，或是您正在竭力避免一场不可避免的崩塌。逆位的高塔暗示：推迟崩溃并不能解决问题。与其在恐惧中维持摇摇欲坠的结构，不如主动拆除重建。您比想象中更能承受真相。逃避越久，崩塌越猛烈。"}},
+  { id:17, name:"星星", nameEn:"The Star", type:"major", symbol:"⭐", upright:{keywords:["希望","信仰","治愈","灵感"],meaning:"在经历了风暴之后，星星出现了。这是宇宙给予您的希望之兆。请相信——您正被引导着，被爱着，被守护着。星星牌象征着内心的平静与灵感的涌现。敞开心扉，接受宇宙的祝福。您的愿望已在星空中被聆听，光明就在前方。"}, reversed:{keywords:["绝望","失去信心","幻灭","灰心"],meaning:"您可能正在经历信念的动摇，看不到希望的曙光。逆位的星星提醒：星星不会熄灭，只是暂时被乌云遮蔽。绝望的感受是真实的，但它不是永恒的。请给自己一些时间来治愈，不要因为暂时的黑暗而否定光明的存在。"}},
+  { id:18, name:"月亮", nameEn:"The Moon", type:"major", symbol:"🌙", upright:{keywords:["幻觉","恐惧","潜意识","梦境"],meaning:"月光下的道路朦胧不清，您无法分辨真实与幻象。月亮牌提醒您：当前的困惑和恐惧可能来自您的潜意识而非现实。请注意那些隐藏的秘密和未经处理的情绪。不要相信每一个出现在脑海中的念头。等待黎明，迷雾自会散去。"}, reversed:{keywords:["释怀","真相揭露","恐惧消散"],meaning:"迷雾正在消散，隐藏在暗处的真相开始显露。逆位的月亮预示着焦虑的缓解和恐惧的释放。您开始看清那些曾经困扰您的幻象。请保持这份清醒——真相有时候不那么美好，但它终究是您需要的答案。混乱即将结束。"}},
+  { id:19, name:"太阳", nameEn:"The Sun", type:"major", symbol:"☀️", upright:{keywords:["快乐","成功","活力","光明"],meaning:"阳光普照！这是塔罗牌中最积极的牌之一。太阳象征着纯粹的喜悦、成就感和生命的活力。无论您问了什么问题，答案都是肯定的。享受当下的幸福，让您的光芒照亮周围的一切。成功已经到来，自信地享受这份荣耀吧。"}, reversed:{keywords:["暂时受阻","乐观但受挫","延迟"],meaning:"阳光依旧在，只是暂时被云层遮挡。逆位的太阳并不意味着失败，只是成功比预期来得晚一些。您可能感到沮丧，但请保持信心——阻碍是暂时的。不要让暂时的阴影夺走您内在的阳光。继续前行，云开见日。"}},
+  { id:20, name:"审判", nameEn:"Judgement", type:"major", symbol:"📯", upright:{keywords:["觉醒","更新","召唤","解脱"],meaning:"号角已经吹响——是时候回应内在的召唤了。审判牌代表着一次深刻的内省与觉醒。您被要求审视过去的行为，并做出重要的决定。这是一个脱胎换骨的机会，请诚实地面对自己，原谅需要原谅的，放下需要放下的。重生的大门正在敞开。"}, reversed:{keywords:["逃避审判","后悔","无法释怀"],meaning:"您可能在逃避面对自己的内心，或是对过去的错误耿耿于怀无法原谅自己。逆位的审判提醒：不审判自己，就无法获得解脱。请停止逃避，面对您一直在回避的问题。原谅自己，才能真正前行。"}},
+  { id:21, name:"世界", nameEn:"The World", type:"major", symbol:"🌍", upright:{keywords:["完成","圆满","成就","旅程"],meaning:"一个完整的循环已经结束。世界牌象征着圆满、成就和与宇宙的合一。您已经完成了重要的生命课题，现在是享受成果的时刻。回顾来时的路，每一步都有它的意义。这也是新的开始——一个更大的循环正在展开。庆祝您的成就吧，您值得这世上所有的美好。"}, reversed:{keywords:["未完成","延迟","不完整","停滞"],meaning:"您离完成只差最后一步，却似乎无法跨过去。逆位的世界指出：某个循环尚未闭合。可能是因为您还在逃避最后的责任，或是缺乏结束的勇气。请审视：什么是您在完成之前还需要处理的？旅程即将完成，不要在最接近终点的地方停下。"}},
+
+  // === MINOR ARCANA — CUPS (圣杯) 14 cards ===
+  { id:22, name:"圣杯王牌", nameEn:"Ace of Cups", type:"minor", arcana:"cups", symbol:"🏆", upright:{keywords:["新感情","爱","直觉","丰盈"],meaning:"情感的甘露正在满溢。圣杯王牌预示着一份新的感情或创造力的迸发。敞开心扉，接受爱的流入。这是一个情感新开始的时刻——无论是一段关系、一个艺术项目，还是对自我的更深层接纳。"}, reversed:{keywords:["情感空虚","压抑","爱被阻碍"],meaning:"情感的流动被堵塞了。您可能在压抑自己的感受，或是拒绝接受他人的关爱。逆位的圣杯王牌提醒：封闭的心无法感受温暖。请找到堵塞的源头，允许情感自然流动。"}},
+  { id:23, name:"圣杯二", nameEn:"Two of Cups", type:"minor", arcana:"cups", symbol:"💞", upright:{keywords:["伴侣","和谐","连结","平等"],meaning:"两颗心的相遇带来了深刻的共鸣。圣杯二象征着平等的伙伴关系——无论是爱情、友情还是合作。现阶段的关系建立在相互尊重的基础上，这是健康而美好的连结。"}, reversed:{keywords:["分手","不平等","信任破裂"],meaning:"关系中的平衡正在被打破。可能存在一方付出过多而另一方索取过度的状况。逆位的圣杯二提醒您审视这段关系中的权力动态。真正的合作需要双方的投入。"}},
+  { id:24, name:"圣杯三", nameEn:"Three of Cups", type:"minor", arcana:"cups", symbol:"🥂", upright:{keywords:["庆祝","友谊","团聚","欢乐"],meaning:"欢庆的时刻到了！圣杯三代表着朋友间的聚会、庆祝和深厚的友谊。与志同道合的人分享快乐，这份连接本身就是一种祝福。让欢乐的能量流入您的生活。"}, reversed:{keywords:["过度放纵","流言","孤立"],meaning:"欢乐可能正在变质——过度的放纵或是朋友圈中的流言蜚语正在消耗您。逆位的圣杯三提醒：真正的朋友不会在您背后议论。审视您的社交圈，质量重于数量。"}},
+  { id:25, name:"圣杯四", nameEn:"Four of Cups", type:"minor", arcana:"cups", symbol:"😒", upright:{keywords:["沉思","不满","厌倦","沉思"],meaning:"您正坐着发呆，忽略了面前的机会。圣杯四反映了内心的厌倦和对现状的不满。也许您需要一段沉思的时间来重新评估自己的需求。但请注意——新的机会可能就在眼前，不要因为沉浸在自己的情绪中而错过。"}, reversed:{keywords:["觉醒","接受机会","新动力"],meaning:"您终于从沉思中抬头，看到了等待已久的机会。逆位的圣杯四标志着动力的回归和视角的转变。是时候从消极中走出来，主动把握那些曾经被您忽略的可能性。"}},
+  { id:26, name:"圣杯五", nameEn:"Five of Cups", type:"minor", arcana:"cups", symbol:"😢", upright:{keywords:["悲伤","失落","遗憾","哀悼"],meaning:"您正沉浸在失去的痛苦中——地上的三个杯子倒了，但身后还有两个立着的杯子。这提醒您：虽然失去是真实的，但并非一切都已经消亡。给自己一些时间来哀悼，然后转身看看那些仍然存在的美好。"}, reversed:{keywords:["接受","希望","走出悲伤"],meaning:"您正在从失落中走出来。逆位的圣杯五表示接受和痊愈的开始。过往的伤痛不会完全消失，但您已学会与它共存。抬头向前看，新的希望正在前方等候。"}},
+  { id:27, name:"圣杯六", nameEn:"Six of Cups", type:"minor", arcana:"cups", symbol:"🕰️", upright:{keywords:["怀旧","童年","回忆","纯真"],meaning:"过去的记忆正在温柔地造访您。圣杯六代表着怀旧、童年的纯真和旧日时光。也许一个老朋友即将出现，或是过去的经历正在给予您新的启示。请以温柔的方式接纳这些回忆。"}, reversed:{keywords:["沉溺过去","无法前行","理想化"],meaning:"您可能过度沉溺于过去的美好，以至于无法活在当下。逆位的圣杯六提醒：回忆是温暖的港湾，但不能成为永久的居所。过去已经过去，请回到现在的生活中。"}},
+  { id:28, name:"圣杯七", nameEn:"Seven of Cups", type:"minor", arcana:"cups", symbol:"🌈", upright:{keywords:["幻想","选择","迷惑","欲望"],meaning:"眼前有太多的选择，让您眼花缭乱。圣杯七代表着幻想和愿望——但不是所有闪闪发光的东西都是金子。您需要从众多诱惑中辨别哪一个是真正值得追求的目标。不要被幻象迷惑。"}, reversed:{keywords:["清醒","做出选择","专注"],meaning:"迷雾散去，您终于看清了真正想要的。逆位的圣杯七标志着清晰的思路和果断的决定。在众多选项中，您已经找到了方向。现在是专注和行动的时候。"}},
+  { id:29, name:"圣杯八", nameEn:"Eight of Cups", type:"minor", arcana:"cups", symbol:"🚶", upright:{keywords:["离开","寻找","转变","放弃"],meaning:"是时候离开了。圣杯八描绘了一个人转身离开已经堆积的情感财富，走向未知的远方。这并非逃避，而是为了更高意义的追寻。有些东西虽然珍贵，却已不再适合现在的您。"}, reversed:{keywords:["徘徊","恐惧离开","犹豫"],meaning:"您知道自己需要离开，却始终没有踏出那一步。逆位的圣杯八反映了对未知的恐惧和对舒适区的依赖。继续留在原地不会让情况变好。请鼓起勇气，走出这一步。"}},
+  { id:30, name:"圣杯九", nameEn:"Nine of Cups", type:"minor", arcana:"cups", symbol:"😊", upright:{keywords:["愿望实现","满足","快乐","丰盛"],meaning:"愿望成真的时刻！圣杯九是"愿望牌"——您内心渴望的事物正在实现。情感上的满足和物质的丰盛正同时到来。享受这份来之不易的喜悦吧，您值得拥有。"}, reversed:{keywords:["不满","愿望未遂","虚荣"],meaning:"表面的满足掩盖了内心的空虚。逆位的圣杯九提醒：物质的丰盛并不能替代情感的满足。您可能得到了想要的却仍然不快乐。请反思：您真正渴望的是什么？"}},
+  { id:31, name:"圣杯十", nameEn:"Ten of Cups", type:"minor", arcana:"cups", symbol:"🌈💕", upright:{keywords:["幸福家庭","圆满","和谐","归属"],meaning:"彩虹下的一家人——这是情感圆满的最高象征。圣杯十代表着家庭的和睦、情感的归属和持久的幸福。您已经找到或即将找到属于您的幸福港湾。珍惜这份圆满。"}, reversed:{keywords:["家庭不和","破碎的梦想"],meaning:"理想中的家庭画面与实际可能存在差距。逆位的圣杯十暗示家庭矛盾或情感归属的失落。这可能是一个修复关系或重新定义"家"的时机的信号。"}},
+  { id:32, name:"圣杯侍从", nameEn:"Page of Cups", type:"minor", arcana:"cups", symbol:"🧒", upright:{keywords:["灵感","创意","直觉","浪漫"],meaning:"一个充满想象力的年轻能量正在进入您的生活。圣杯侍从代表着创意的火花、浪漫的萌芽和直觉的信息。请保持开放的心态，接收这份来自心灵的礼物。一个新的创意或情感正在萌芽。"}, reversed:{keywords:["情感不成熟","幻想","创造受阻"],meaning:"创意受阻或情感上的不成熟正在影响您。逆位的圣杯侍从可能代表一个不成熟的情感对象，或是您自己的创造力被压抑。请找到表达的出口。"}},
+  { id:33, name:"圣杯骑士", nameEn:"Knight of Cups", type:"minor", arcana:"cups", symbol:"🏇", upright:{keywords:["浪漫","追求","理想主义","邀约"],meaning:"一位浪漫的骑士正向您奔来。他代表着情感的邀约、艺术的追求和理想主义的精神。这个能量鼓励您追随内心所爱。无论是爱情还是艺术，请勇敢地追求您心中的美。"}, reversed:{keywords:["情绪化","不切实际","失望"],meaning:"浪漫的理想可能与现实产生了碰撞。逆位的圣杯骑士警示：过度的理想主义可能导致失望。情感上的波动正在影响您的判断。请保持浪漫但不失理性。"}},
+  { id:34, name:"圣杯王后", nameEn:"Queen of Cups", type:"minor", arcana:"cups", symbol:"👸", upright:{keywords:["同理心","滋养","直觉","情感深度"],meaning:"圣杯王后是情感智慧的化身。她以深沉的同理心和直觉来感知世界。这张牌呼吁您以温柔和慈悲对待自己和他人。相信您的直觉——它比任何逻辑都更了解真相。"}, reversed:{keywords:["情绪依赖","情感操控","敏感过度"],meaning:"情感的深度可能变成了负担。逆位的圣杯王后提示：您的敏感可能正在被利用，或是您过度依赖他人的情感反馈。请设立健康的情感边界。"}},
+  { id:35, name:"圣杯国王", nameEn:"King of Cups", type:"minor", arcana:"cups", symbol:"🤴", upright:{keywords:["情感掌控","宽容","成熟的爱"],meaning:"圣杯国王代表了情感的巅峰——不是压抑情感，而是巧妙地驾驭它。他象征着一位成熟且有智慧的情感导师。现在是时候以冷静和慈悲来应对情感挑战了。"}, reversed:{keywords:["情绪失控","操控","冷漠"],meaning:"情感的控制出现了问题。逆位的圣杯国王可能代表一个善于操控他人情感的人，或是您自己正在被情绪淹没而失去冷静。请找回内在的情感平衡。"}},
+
+  // === MINOR ARCANA — SWORDS (宝剑) 14 cards ===
+  { id:36, name:"宝剑王牌", nameEn:"Ace of Swords", type:"minor", arcana:"swords", symbol:"⚔️", upright:{keywords:["清晰","真相","突破","决断"],meaning:"真理之剑划破迷雾，带来一瞬的清明。宝剑王牌代表着清晰的思维、真相的揭示和关键的决定。一个重大的突破即将到来——可能是您终于看清了某个问题的本质。以理智为武器，斩断困惑。"}, reversed:{keywords:["混乱","误解","暴力","错误判断"],meaning:"思维的迷雾让您无法看清真相。逆位的宝剑王牌暗示着误判、信息混乱或是言辞上的暴力。在做决定之前，请确保您掌握了全部的信息。"}},
+  { id:37, name:"宝剑二", nameEn:"Two of Swords", type:"minor", arcana:"swords", symbol:"🤞", upright:{keywords:["僵局","抉择","逃避","平衡"],meaning:"您正处在一个艰难的十字路口，手中握着的两把剑代表了两种选择。宝剑二反映了内心的僵持与犹豫——无论选择哪一边，都可能有所牺牲。但请记住：不做决定本身就是一种决定。"}, reversed:{keywords:["做出决定","打破僵局"],meaning:"僵局终于被打破！逆位的宝剑二标志着抉择的时刻已经到来。您不再逃避那个让您纠结的决定。虽然结果尚不明朗，但行动总比停滞更有力量。"}},
+  { id:38, name:"宝剑三", nameEn:"Three of Swords", type:"minor", arcana:"swords", symbol:"💔", upright:{keywords:["心碎","悲伤","分离","痛苦"],meaning:"三把剑刺穿了一颗心——这是塔罗中最直白的心碎之牌。分离、背叛或深深的悲伤正在影响您。痛苦是真实的，请不要急于跳过这段时期。感受它，体会它，然后让它教会您关于爱的真正意义。"}, reversed:{keywords:["愈合","释怀","释放痛苦"],meaning:"伤口正在愈合，虽然疤痕仍在。逆位的宝剑三标志着从痛苦中走出来的过程。您已经开始释放那些折磨您的情感。请继续允许自己痊愈——时间是最好的良药。"}},
+  { id:39, name:"宝剑四", nameEn:"Four of Swords", type:"minor", arcana:"swords", symbol:"🛌", upright:{keywords:["休息","恢复","静思","撤退"],meaning:"您的身心正在发出休息的信号。宝剑四展现了一个人在教堂中静卧——这是需要恢复和沉思的时刻。暂时从战场撤离不是懦弱，而是为了积蓄力量。给自己安静的空间，让身心修复。"}, reversed:{keywords:["焦躁","无法休息","重出江湖"],meaning:"您已经休息太久了——或是焦虑让您无法真正放松。逆位的宝剑四可能是时候重新回到生活的战场上了。或是您的头脑仍在过度运转，无法真正静下来。"}},
+  { id:40, name:"宝剑五", nameEn:"Five of Swords", type:"minor", arcana:"swords", symbol:"😤", upright:{keywords:["冲突","失败","胜利空虚","背叛"],meaning:"一场争斗结束了，但胜利的滋味可能并不甜美。宝剑五描绘了冲突之后的场景——有人赢了，但代价是关系的破裂。在追求胜利之前，请思考：这个胜利真的值得吗？有些战斗不值得打。"}, reversed:{keywords:["和解","放下","寻求和平"],meaning:"冲突之后的反思开始了。逆位的宝剑五暗示着和解的可能性——您可能正在寻求弥补或放下。过去的争执已经过去，现在是修复关系的时候。"}},
+  { id:41, name:"宝剑六", nameEn:"Six of Swords", type:"minor", arcana:"swords", symbol:"🚣", upright:{keywords:["过渡","前进","治愈","旅行"],meaning:"您正乘船离开动荡的水域，驶向更平静的彼岸。宝剑六代表着从困难时期过渡到更稳定的状态。虽然旅程还在进行中，但方向是正确的。身边有人或力量在帮助您前行。"}, reversed:{keywords:["无法离开","停滞","回归混乱"],meaning:"您可能无法顺利过渡——也许是因为放不下过去，或是遇到了意料之外的阻力。逆位的宝剑六暗示旅途中出现了波折。请审视：是什么让您无法顺利前行？"}},
+  { id:42, name:"宝剑七", nameEn:"Seven of Swords", type:"minor", arcana:"swords", symbol:"🦊", upright:{keywords:["策略","欺骗","狡猾","独立"],meaning:"一个机敏的策略正在实施中。宝剑七象征着狡猾、隐秘的行动和策略性的思考。您可能需要独自行动，或是以非传统的方式来达成目标。但请注意：策略与欺骗只在一线之间。"}, reversed:{keywords:["被揭穿","真相揭露","懊悔"],meaning:"隐藏的行为可能即将被曝光。逆位的宝剑七警示：您的秘密或策略可能被人发现。如果之前的行动不够光明正大，现在是面对后果的时候。坦诚相待，比任何策略都更有效。"}},
+  { id:43, name:"宝剑八", nameEn:"Eight of Swords", type:"minor", arcana:"swords", symbol:"😰", upright:{keywords:["束缚","限制","恐惧","无力"],meaning:"您感到自己被环境所困，但包围您的剑并非无法穿越。宝剑八揭示的是一种心理上的束缚——恐惧和消极思维将您困住。实际上，限制您的往往只是自己的想法。摘下眼罩，您会发现出路一直存在。"}, reversed:{keywords:["解放","突破","摆脱恐惧"],meaning:"束缚正在被解开！逆位的宝剑八标志着从限制中解放出来的过程。您开始看到走出困境的可能性。恐惧正在消退，主动权重新回到您的手中。"}},
+  { id:44, name:"宝剑九", nameEn:"Nine of Swords", type:"minor", arcana:"swords", symbol:"😱", upright:{keywords:["焦虑","噩梦","内疚","恐惧"],meaning:"深夜的焦虑正在折磨您。宝剑九是"噩梦牌"——您可能在深夜辗转反侧，被担忧和愧疚包围。请记住：大部分的恐惧是头脑的产物，不一定反映真实。天总会亮，噩梦终将结束。"}, reversed:{keywords:["释怀","希望","焦虑减轻"],meaning:"最黑暗的夜晚正在过去。逆位的宝剑九表示焦虑的缓解和希望的回归。您开始从担忧的漩涡中挣脱出来。虽然问题可能还在，但您的视角正在转变。"}},
+  { id:45, name:"宝剑十", nameEn:"Ten of Swords", type:"minor", arcana:"swords", symbol:"💀⚔️", upright:{keywords:["结束","触底","背叛","崩坏"],meaning:"十把剑刺穿了倒在地上的人——这看起来是最糟糕的画面，但也意味着事情无法更坏了。宝剑十代表着彻底的终结和触底。好消息是：已经到了谷底，接下来的每一步都是上升。"}, reversed:{keywords:["恢复","重生","学习教训"],meaning:"从触底中反弹的力量正在积蓄。逆位的宝剑十标志着从崩溃中站起来的勇气。最糟糕的已经过去，现在是重建的时刻。向死而生，您比从前更坚强。"}},
+  { id:46, name:"宝剑侍从", nameEn:"Page of Swords", type:"minor", arcana:"swords", symbol:"🧑‍🎓", upright:{keywords:["好奇","新想法","沟通","警觉"],meaning:"一股敏锐且充满好奇心的能量正围绕在您身边。宝剑侍从代表着信息的获取、新的思想火花和智力上的探索。保持警觉，因为重要的消息可能很快就会出现。"}, reversed:{keywords:["流言","肤浅","言多必失"],meaning:"您可能正在参与无意义的闲谈，或是对信息的把握不够深入。逆位的宝剑侍从提醒：未经证实的消息不要轻信，也不要传播。"}},
+  { id:47, name:"宝剑骑士", nameEn:"Knight of Swords", type:"minor", arcana:"swords", symbol:"⚡", upright:{keywords:["迅速","决断","行动力","进取"],meaning:"如风一般冲刺的骑士——行动力达到了巅峰。宝剑骑士代表着果断、勇敢和激情。此时的您需要像他一样，以速度和决心冲向目标。但请记得在疾驰之余，也留意路况。"}, reversed:{keywords:["鲁莽","冲动","不计后果"],meaning:"速度太快了——您可能在毫无计划的情况下冲动行事。逆位的宝剑骑士警告：勇往直前是好事，但没有方向的冲锋只会耗尽能量。"}},
+  { id:48, name:"宝剑王后", nameEn:"Queen of Swords", type:"minor", arcana:"swords", symbol:"👸⚔️", upright:{keywords:["独立思考","清晰","洞察力","理智"],meaning:"宝剑王后以理性之眼审视一切。她代表着独立的思考、清晰的判断和不被情绪左右的能力。当您需要做出明智的决定时，请以王后为榜样——不带偏见地审视事实，然后果断行事。"}, reversed:{keywords:["刻薄","偏见","冷漠","无情"],meaning:"理性可能正在变成冷漠或刻薄。逆位的宝剑王后反映了一个过于严苛的态度——对他人的挑剔和无情。请让您的智慧之中也融入一丝温暖。"}},
+  { id:49, name:"宝剑国王", nameEn:"King of Swords", type:"minor", arcana:"swords", symbol:"🤴⚖️", upright:{keywords:["权威","清晰","智慧","公正"],meaning:"宝剑国王是理智与权威的化身。他以公正和智慧来治理一切。这张牌呼吁您以冷静的头脑和高远的视野来处理事务。真理和公正是他最关心的——请以同样的高标准要求自己。"}, reversed:{keywords:["独裁","滥用思想","冷漠"],meaning:"权利与智慧正在被滥用。逆位的宝剑国王反映了一个专横且不近人情的权威形象。您需要注意是否有人在以"理性"之名行压迫之实。"}},
+
+  // === MINOR ARCANA — PENTACLES (星币) 14 cards ===
+  { id:50, name:"星币王牌", nameEn:"Ace of Pentacles", type:"minor", arcana:"pentacles", symbol:"🪙", upright:{keywords:["新机遇","财富","丰裕","稳定"],meaning:"一枚金色的星币出现在您面前——这是财富与机遇的象征。星币王牌预示着新的工作机会、投资回报或物质生活的改善。请把握好这份来自大地的礼物。稳健的行动将为您带来丰厚的回报。"}, reversed:{keywords:["错失机会","财务问题","贪婪"],meaning:"一个机会可能正在溜走，或是对金钱的过度追求正在偏离正轨。逆位的星币王牌提醒：财富不只是金钱，还包括健康与时间。不要因为贪婪而忽略了真正的价值。"}},
+  { id:51, name:"星币二", nameEn:"Two of Pentacles", type:"minor", arcana:"pentacles", symbol:"⚖️💰", upright:{keywords:["平衡","弹性","适应","多头管理"],meaning:"生活的多个面向正在拉扯着您——工作、家庭、财务……星币二展现了您在忙碌中维持平衡的能力。您拥有足够的弹性来应对这一切。优先级的排序将帮助您更好地管理手头的多重任务。"}, reversed:{keywords:["失衡","过度承诺","混乱"],meaning:"平衡被打破了。逆位的星币二表示您在承担超出能力范围的事务，或者财务管理出现了混乱。请停下过度的承诺，重新审视哪些才是真正重要的事。"}},
+  { id:52, name:"星币三", nameEn:"Three of Pentacles", type:"minor", arcana:"pentacles", symbol:"🏗️", upright:{keywords:["合作","技艺","规划","成长"],meaning:"团队协作的力量正在显现。星币三代表着共同创作、技艺的精进和扎实的规划。您不是一个人在战斗——通过合作和相互补充，一个优秀的作品正在成型。"}, reversed:{keywords:["缺乏合作","质量差","缺乏投入"],meaning:"团队出现了问题，或是工作质量达不到标准。逆位的星币三指出合作中的摩擦和态度的敷衍。请反思：您是否全心投入了？团队中的沟通是否需要改善？"}},
+  { id:53, name:"星币四", nameEn:"Four of Pentacles", type:"minor", arcana:"pentacles", symbol:"🫴", upright:{keywords:["守财","控制","安全","节俭"],meaning:"您紧紧抓住手中的财富，生怕失去。星币四反映的是对物质安全感的渴望——适度的储蓄是明智的。但请留意：过度紧握会让能量无法流动。有些安全感来自于分享，而非独占。"}, reversed:{keywords:["挥霍","放手","分享"],meaning:"您可能正在过度消费，或是终于学会了放手。逆位的星币四既可以代表财务上的挥霍，也可以代表从紧抓不放中解脱。请确保您的支出与收入相匹配。"}},
+  { id:54, name:"星币五", nameEn:"Five of Pentacles", type:"minor", arcana:"pentacles", symbol:"🥶", upright:{keywords:["匮乏","困境","被忽略","孤立"],meaning:"在风雪中行走的两人似乎被遗忘了——星币五代表着财务困境或精神上的匮乏感。但请注意：教堂的窗户透出了温暖的光，帮助其实就在附近。请不要因为骄傲或绝望而拒绝伸手求助。"}, reversed:{keywords:["恢复","找到希望","走出困境"],meaning:"困境正在过去！逆位的星币五表示您开始从匮乏的状态中恢复。温暖的灯光变得更近了。请保持希望——这段时间的经历将教会您珍惜与坚韧。"}},
+  { id:55, name:"星币六", nameEn:"Six of Pentacles", type:"minor", arcana:"pentacles", symbol:"🤝", upright:{keywords:["施舍","接受","慷慨","平衡"],meaning:"给予与接受之间的平衡是当下的主题。星币六描绘了一个富人在施舍给穷人的场景。您可能是给予者，也可能是接受者——无论哪种角色，请以感恩和善意来对待这份互动。"}, reversed:{keywords:["不平等施舍","欠债","滥用善意"],meaning:"施舍中可能存在不平等的权力关系。逆位的星币六警示：您的善意可能被利用，或是您在接受帮助时感到尊严受损。财务上的借贷关系需要被重新审视。"}},
+  { id:56, name:"星币七", nameEn:"Seven of Pentacles", type:"minor", arcana:"pentacles", symbol:"🌱", upright:{keywords:["等待","评估","耐心","投资"],meaning:"您正站在自己耕耘的花园中，审视着已经成长的果实。星币七代表着耐心和评估——您投入的努力是否值得？不要急于收获，有些成长还需要更多时间。但同样，也需要客观地评估：是否有些投入需要被放弃？"}, reversed:{keywords:["焦虑","无果","浪费精力"],meaning:"等待似乎没有尽头，投入的努力看起来没有回报。逆位的星币七表示您可能正在一个无果的事情上浪费精力。该放手时就放手，及时止损也是智慧。"}},
+  { id:57, name:"星币八", nameEn:"Eight of Pentacles", type:"minor", arcana:"pentacles", symbol:"🔨", upright:{keywords:["勤勉","技艺","专注","精进"],meaning:"专心致志地打磨每一个细节——星币八是工匠精神的体现。这是通过重复练习和勤奋工作来精进技艺的时期。成功没有捷径，日复一日的付出将带您走向精通。享受这个过程，而非只盯着结果。"}, reversed:{keywords:["敷衍","缺乏动力","工作质量差"],meaning:"正在失去对工作的热情，或是产出的质量在下滑。逆位的星币八提醒：敷衍了事无法带来真正的成就感。找到让您重新燃起激情的方式，或是考虑是否走在正确的道路上。"}},
+  { id:58, name:"星币九", nameEn:"Nine of Pentacles", type:"minor", arcana:"pentacles", symbol:"🦅", upright:{keywords:["独立","丰裕","优雅","自足"],meaning:"一位优雅的女士在自己的花园中享受成果——她代表的是财务独立和自我实现。星币九预示着通过自律和努力获得的富足生活。您已经达到了一个可以充分享受的阶段。为自己的成就感到骄傲吧。"}, reversed:{keywords:["依赖他人","财务不稳","虚荣"],meaning:"独立可能只是表象，或是财务的稳定正在受到威胁。逆位的星币九提示：您是否真正独立，还是在依赖他人的支持？表面的光鲜可能掩盖了内在的不安。"}},
+  { id:59, name:"星币十", nameEn:"Ten of Pentacles", type:"minor", arcana:"pentacles", symbol:"🏰", upright:{keywords:["财富传承","家族","长久","稳定"],meaning:"世代相传的财富与智慧——星币十代表着长久的繁荣和家族的根基。这是一个关于稳定、传承和永久价值的牌。您建立的不仅是短期的收益，更是可以传承的事业或家庭。"}, reversed:{keywords:["家族纠纷","财产损失","不稳定"],meaning:"家族内部的争执或财务的不稳定可能正在影响您。逆位的星币十提醒：财富不只是钱，更是关系的传承。不要为了利益而牺牲亲情。"}},
+  { id:60, name:"星币侍从", nameEn:"Page of Pentacles", type:"minor", arcana:"pentacles", symbol:"📚", upright:{keywords:["学习","新技能","务实","萌芽"],meaning:"对于新知识和技能的渴求是当下的主题。星币侍从代表了学习、实践和对未来的务实规划。一个关于工作、学习或投资的踏实计划正在成形。一步一个脚印，未来可期。"}, reversed:{keywords:["拖延","缺乏投入","学习障碍"],meaning:"学习或计划可能遇到了瓶颈。逆位的星币侍从表示缺乏持续的投入或耐心。您需要重新找回对成长的渴望，并制定更实际可行的方案。"}},
+  { id:61, name:"星币骑士", nameEn:"Knight of Pentacles", type:"minor", arcana:"pentacles", symbol:"🐴", upright:{keywords:["踏实","可靠","坚持","务实"],meaning:"稳重的骑士不急不躁，一步一个脚印地向前。星币骑士代表着最可靠的品质——耐心、责任感和脚踏实地。成功不一定快，但一定会到。以他的方式，稳步推进您的目标。"}, reversed:{keywords:["停滞","固执","无聊"],meaning:"踏实可能变成了固执和停滞。逆位的星币骑士表示对改变的不情愿，或是因为太过保守而错失机会。稳扎稳打是好事，但偶尔也需要加速。"}},
+  { id:62, name:"星币王后", nameEn:"Queen of Pentacles", type:"minor", arcana:"pentacles", symbol:"👸🌿", upright:{keywords:["滋养","务实","富足","持家"],meaning:"星币王后是大地之母的化身——她以务实的方式滋养着周围的一切。她代表着稳定、丰盛和实际的关怀。当这张牌出现时，请以她的方式：照顾好生活的细节，温暖而坚定地支撑起您的世界。"}, reversed:{keywords:["忽略","财务混乱","过度控制"],meaning:"生活细节正在失控，或是您对他人的关怀变成了过度的控制。逆位的星币王后提醒：真正的滋养是支持生长，而非束缚。"}},
+  { id:63, name:"星币国王", nameEn:"King of Pentacles", type:"minor", arcana:"pentacles", symbol:"🤴💰", upright:{keywords:["财富","成功","稳定","务实领导"],meaning:"星币国王稳坐于他的宝座上，代表着财务的顶峰和务实的领导力。通过多年的经验累积，他已经掌握了物质世界的法则。这张牌预示着财务上的稳定和值得信赖的领导。是时候以他的方式来管理您的资源了。"}, reversed:{keywords:["贪婪","腐败","挥霍"],meaning:"对财富的掌控可能变成了贪婪或腐败。逆位的星币国王反映了一个过度追求物质或滥用财产的形象。请审视您与金钱的关系——是您在支配钱，还是钱在支配您？"}},
+
+  // === MINOR ARCANA — WANDS (权杖) 14 cards ===
+  { id:64, name:"权杖王牌", nameEn:"Ace of Wands", type:"minor", arcana:"wands", symbol:"🔥", upright:{keywords:["新创意","激情","开始","灵感"],meaning:"一团创造之火在您心中燃起！权杖王牌代表着一个全新的灵感、创意的火花和行动的冲动。这是一个充满能量的开端——当您感受到这份激情时，请勇敢地追随它。现在正是开始新项目的最佳时机。"}, reversed:{keywords:["创意受阻","延迟","缺乏方向"],meaning:"火苗被压制了——您的创意可能遇到了阻碍，或是一个本应开始的项目被推迟了。逆位的权杖王牌提醒：不是没有灵感，而是缺乏行动的条件或勇气。找到是什么在阻碍火的燃烧。"}},
+  { id:65, name:"权杖二", nameEn:"Two of Wands", type:"minor", arcana:"wands", symbol:"🌏", upright:{keywords:["计划","前瞻","决定","掌控"],meaning:"您站在高处俯瞰眼前的广阔世界，手中握着地球的象征。权杖二代表着远见和规划——现在是为未来做出重大决定的时刻。不要只盯着眼前，放眼遥远的未来，您的人生应该向哪个方向前进？"}, reversed:{keywords:["缺乏远见","犹豫","惧怕未知"],meaning:"面对未来的选择，您感到了犹豫和恐惧。逆位的权杖二暗示：缺乏清晰的方向或是对未知的惧怕正在限制您的决策。有时，选择困难来自您想同时拥有所有选项。"}},
+  { id:66, name:"权杖三", nameEn:"Three of Wands", type:"minor", arcana:"wands", symbol:"🚢", upright:{keywords:["扩张","探索","远见","贸易"],meaning:"商船即将归来——权杖三代表着对未来的规划和扩张的眼光。您已经迈出了重要的步伐，现在正在等待成果的显现。前方的地平线广阔无垠，您的努力将带来比预想更大的回报。"}, reversed:{keywords:["延迟","障碍","计划受阻"],meaning:"期待的结果迟迟未到，或是您的计划遇到了意外的阻碍。逆位的权杖三指出：扩张的步伐需要调整。问题不在于目标，而在于时机或方式。在重新规划的同时，也要保持信心。"}},
+  { id:67, name:"权杖四", nameEn:"Four of Wands", type:"minor", arcana:"wands", symbol:"🎉", upright:{keywords:["庆祝","稳定","家园","和谐"],meaning:"回家的庆典！权杖四代表着完成一个里程碑之后的庆祝和喜悦。无论是乔迁、婚礼还是项目的阶段性完成，现在都是与亲朋好友共享欢乐的时刻。稳固的基础已经建好，尽情庆祝吧。"}, reversed:{keywords:["不稳定","延迟庆祝","缺乏归属"],meaning:"庆祝的时刻被推迟了，或是虽然周围热闹但内心无法真正放松。逆位的权杖四可能表示家庭或团队中的不稳定。找到不安的根源，解决它之后才能真正庆祝。"}},
+  { id:68, name:"权杖五", nameEn:"Five of Wands", type:"minor", arcana:"wands", symbol:"🤼", upright:{keywords:["竞争","冲突","混乱","挑战"],meaning:"五根权杖交织在一起——这是一个竞争激烈的环境。权杖五代表着冲突和竞争，但这不一定是坏事。健康的竞争可以激发创意和成长。只是要注意：不要让竞争变成了无意义的争吵。"}, reversed:{keywords:["逃避冲突","协调","共识"],meaning:"冲突终于平息了，或是您选择回避竞争。逆位的权杖五意味着和解和避免纷争。然而也要注意：有些冲突是成长的必要过程，一味回避并非长久之计。"}},
+  { id:69, name:"权杖六", nameEn:"Six of Wands", type:"minor", arcana:"wands", symbol:"🏆", upright:{keywords:["胜利","认可","自信","荣耀"],meaning:"凯旋的战士们回来了！权杖六代表着被公众认可的胜利和自信心的提升。您的努力得到了应有的关注和赞美。自豪地接受这份荣耀吧——这是您应得的。"}, reversed:{keywords:["失败","不被认可","自负"],meaning:"期待的认可没有到来，或是胜利的光环正在消退。逆位的权杖六可能意味着自大导致的人际问题，或是努力没有得到公平的回报。真正的自信不需要外界的不断验证。"}},
+  { id:70, name:"权杖七", nameEn:"Seven of Wands", type:"minor", arcana:"wands", symbol:"🛡️", upright:{keywords:["坚持","防御","立场","勇气"],meaning:"一个人在高低地独自对抗来犯——权杖七代表着捍卫自己立场和权益的勇气。您可能正面临外界的挑战或质疑，但请站稳脚跟。您有足够的力量来守护自己辛苦建立的一切。"}, reversed:{keywords:["屈服","放弃","被压垮"],meaning:"防御的力量正在减弱——您可能感到无法再坚持下去了。逆位的权杖七反映了被压力压垮的感觉，或是对自己立场的动摇。但请记住：寻求帮助不等于放弃。一个人可以撑很久，但不需要永远一个人撑着。"}},
+  { id:71, name:"权杖八", nameEn:"Eight of Wands", type:"minor", arcana:"wands", symbol:"✈️", upright:{keywords:["快速","进展","消息","行动"],meaning:"八根权杖正飞速划过天空——事情正在迅速推进！权杖八代表着快速的进展、即将到来的消息和没有阻碍的行动。停滞已经结束，一场快速的推进正在展开。保持警觉，好消息或重要的信息随时可能到来。"}, reversed:{keywords:["延迟","停滞","混乱"],meaning:"快速的行动慢下来了——或是本来应该到的消息迟迟未至。逆位的权杖八表示进展中的瓶颈和延误。请审视：是哪个环节卡住了？也许需要回头处理未完成的事务。"}},
+  { id:72, name:"权杖九", nameEn:"Nine of Wands", type:"minor", arcana:"wands", symbol:"😤", upright:{keywords:["韧性","坚持","最后一次守卫"],meaning:"虽然疲惫且伤痕累累，但他仍然守卫着自己的阵地。权杖九代表着百折不挠的韧性。您已经经历了漫长的斗争，身体与精神都已疲惫——但还剩最后一道防线。坚持住，您比想象中更加坚韧。"}, reversed:{keywords:["放弃","耗尽","退出"],meaning:"最后的防线正在崩溃，或是您决定不再坚持下去。逆位的权杖九反映了精力耗尽的状态。有时候，撤退不是懦弱——而是为了保存实力。但如果这是您内心真正想要的，请再坚持一下。"}},
+  { id:73, name:"权杖十", nameEn:"Ten of Wands", type:"minor", arcana:"wands", symbol:"🏋️", upright:{keywords:["负担","责任","压力","过劳"],meaning:"背负着十根沉重的权杖——您正被过多的责任和义务压得喘不过气。权杖十揭示了过度承担的问题。这些负担可能来自工作、家庭或您自己设定过高的标准。是时候审问自己：哪些负担是可以放下的？"}, reversed:{keywords:["释重","分派","卸下负担"],meaning:"沉重的负担正在被释放！逆位的权杖十标志着您终于开始学会说"不"，或是将责任分派出去。您不需要独自承担一切。学会放手，才能走得更远。"}},
+  { id:74, name:"权杖侍从", nameEn:"Page of Wands", type:"minor", arcana:"wands", symbol:"🧑‍🚀", upright:{keywords:["探索","新想法","热情","冒险"],meaning:"一个充满热情和探索精神的年轻能量正在涌现。权杖侍从代表着一个新的创意、旅行或是冒险即将开始。保持好奇和开放的心态——前方的世界有无尽的可能。您的热情足以点燃新的旅程。"}, reversed:{keywords:["方向不明","热情消退","幼稚"],meaning:"热情的火苗变成了烟雾——您可能对新的计划感到犹豫不决，或是创意的方向不明确。逆位的权杖侍从提醒：找到了方向才能把火点燃。不要轻易放弃开始，也不要盲目地四处乱窜。"}},
+  { id:75, name:"权杖骑士", nameEn:"Knight of Wands", type:"minor", arcana:"wands", symbol:"🏇🔥", upright:{keywords:["激情","冒险","冲动","行动"],meaning:"火焰骑士以奔放的热情冲向未知的冒险！权杖骑士代表着无畏的行动、冒险的精神和热烈的激情。这是一个说走就走的能量——如果您内心有什么冲动的想法，现在就是行动的时刻。"}, reversed:{keywords:["冲动误事","半途而废","缺乏耐心"],meaning:"激情有余而毅力不足。逆位的权杖骑士警示：冲动可能导致半途而废或是鲁莽的决策。热情是燃料，但您也需要方向盘。请不要因为短暂的热血就抛下所有计划。"}},
+  { id:76, name:"权杖王后", nameEn:"Queen of Wands", type:"minor", arcana:"wands", symbol:"👸🔥", upright:{keywords:["自信","魅力","独立","热情"],meaning:"权杖王后散发着自信与魅力——她是热情和决心的化身。她鼓励您以自信和积极的态度来面对生活。现在的您充满了感染他人的能量和创造力。以她的精神：大胆地做自己，世界将为您欢呼。"}, reversed:{keywords:["咄咄逼人","自我中心","疲惫"],meaning:"自信可能变成了自我中心或盛气凌人。逆位的权杖王后提示：您的热烈个性可能在无意中压制了他人。也可能是热情耗尽后的疲惫感正在侵扰您。"}},
+  { id:77, name:"权杖国王", nameEn:"King of Wands", type:"minor", arcana:"wands", symbol:"🤴🔥", upright:{keywords:["领导力","远见","创业精神"],meaning:"权杖国王是天生的领导者——他以远见和热情引领众人。他代表着企业家的精神、大胆的决策和对未来的清晰展望。请以他的方式来领导——用热情感染团队，以诚信赢得尊重。"}, reversed:{keywords:["独裁","暴躁","滥权"],meaning:"领导力走向了极端——独裁或暴躁正在伤害您的团队。逆位的权杖国王表现出了一个滥用权力或急躁的领导形象。如果这是您自身，请收敛锋芒；如果这是他人，请保持距离。"}}
+];
+
+// ============ GLOBAL STATE ============
+let shuffledDeck = [];
+let drawnCards = [];        // 3 drawn cards (with isUpright)
+let flippedCount = 0;
+let userQuestion = '';
+let isDrawing = false;
+let visitorCount = 0;
+
+// ============ SPLASH QUOTES ============
+const MYSTICAL_QUOTES = [
+  '"命运并非机遇，而是一种选择；它不是等待，而是需要去实现。"',
+  '"每一条走过的路，都是通往你自身命运的旅程。"',
+  '"星辰不会决定你的命运，它们只是映照你灵魂的地图。"',
+  '"当你凝视深渊时，命运之轮已经悄然转动。"',
+  '"世间万物皆有定时——相遇有时，离别有时，觉醒有时。"',
+  '"你手中握着的不是牌，而是你内心早已写下的答案。"',
+  '"宇宙以神秘的方式编织每一个灵魂的轨迹。"',
+  '"命运的线索早已藏在你的每一次呼吸之中。"',
+  '"不必急于解开所有谜题，有些答案需要时间来靠近你。"',
+  '"塔罗牌如镜，照见的从来不是神谕，而是你内心深处的声音。"'
+];
+
+// ============ PARTICLES ============
+function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  const maxParticles = 60;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Particle {
+    constructor() {
+      this.reset(true);
+    }
+    reset(init) {
+      this.x = Math.random() * canvas.width;
+      this.y = init ? Math.random() * canvas.height : canvas.height + 20;
+      this.size = Math.random() * 2 + 0.5;
+      this.speedY = Math.random() * 0.4 + 0.1;
+      this.speedX = (Math.random() - 0.5) * 0.3;
+      this.opacity = Math.random() * 0.6 + 0.1;
+      this.pulse = Math.random() * Math.PI * 2;
+    }
+    update() {
+      this.y -= this.speedY;
+      this.x += this.speedX + Math.sin(this.pulse) * 0.2;
+      this.pulse += 0.01;
+      if (this.y < -10) this.reset(false);
+      if (this.x < 0) this.x = canvas.width;
+      if (this.x > canvas.width) this.x = 0;
+    }
+    draw() {
+      const alpha = this.opacity + Math.sin(this.pulse) * 0.15;
+      ctx.fillStyle = `rgba(201,168,76,${Math.max(0.05, alpha)})`;
+      ctx.shadowBlur = this.size * 4;
+      ctx.shadowColor = 'rgba(201,168,76,0.5)';
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  for (let i = 0; i < maxParticles; i++) {
+    particles.push(new Particle());
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// ============ SPLASH ============
+function initSplash() {
+  const quote = MYSTICAL_QUOTES[Math.floor(Math.random() * MYSTICAL_QUOTES.length)];
+  document.getElementById('splash-quote-text').textContent = quote;
+
+  setTimeout(() => {
+    document.getElementById('splash-overlay').classList.add('fade-out');
+  }, 5000);
+}
+
+// ============ TOAST ============
+function showToast(msg, duration = 2500) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => document.body.removeChild(toast), 400);
+  }, duration);
+}
+
+// ============ ADMIN ============
+function openAdminModal() {
+  document.getElementById('admin-modal').classList.add('active');
+  document.getElementById('admin-login-phase').style.display = 'block';
+  document.getElementById('admin-dashboard-phase').style.display = 'none';
+  document.getElementById('admin-error').textContent = '';
+  document.getElementById('admin-code-input').value = '';
+  setTimeout(() => document.getElementById('admin-code-input').focus(), 300);
+}
+
+function closeAdminModal() {
+  document.getElementById('admin-modal').classList.remove('active');
+}
+
+async function adminLogin() {
+  const code = document.getElementById('admin-code-input').value.trim();
+
+  if (!code) {
+    document.getElementById('admin-error').textContent = '请输入管理码';
+    return;
+  }
+
+  try {
+    const resp = await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const data = await resp.json();
+
+    if (data.authorized) {
+      document.getElementById('admin-login-phase').style.display = 'none';
+      document.getElementById('admin-dashboard-phase').style.display = 'block';
+      document.getElementById('admin-count').textContent = data.totalVisitors;
+    } else {
+      document.getElementById('admin-error').textContent = '管理码错误，请重试';
+      document.getElementById('admin-code-input').value = '';
+      document.getElementById('admin-code-input').focus();
+    }
+  } catch (e) {
+    // Fallback for local file usage without server
+    if (code === 'taroyuan112510') {
+      document.getElementById('admin-login-phase').style.display = 'none';
+      document.getElementById('admin-dashboard-phase').style.display = 'block';
+      document.getElementById('admin-count').textContent = visitorCount || '—';
+    } else {
+      document.getElementById('admin-error').textContent = '管理码错误，请重试';
+      document.getElementById('admin-code-input').value = '';
+      document.getElementById('admin-code-input').focus();
+    }
+  }
+}
+
+// Close modals on overlay click
+document.getElementById('admin-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAdminModal();
+});
+document.getElementById('question-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeQuestionModal();
+});
+
+// ============ SHUFFLE & FAN ============
+function shuffleDeck(deck) {
+  const arr = [...deck];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startShuffle() {
+  if (isDrawing) return;
+
+  // Hide reading panel
+  document.getElementById('reading-panel').classList.remove('visible');
+  document.getElementById('reading-panel').innerHTML = '';
+  document.getElementById('selected-cards-area').innerHTML = '';
+  drawnCards = [];
+  flippedCount = 0;
+
+  // Shuffle deck
+  shuffledDeck = shuffleDeck(TAROT_DECK).map(card => ({
+    ...card,
+    isUpright: Math.random() > 0.5
+  }));
+
+  document.getElementById('shuffle-btn').disabled = true;
+  document.getElementById('help-text').textContent = '🃏 牌已洗好 · 请点击「开始抽牌」提问';
+  document.getElementById('shuffle-btn').textContent = '✧ 重 新 洗 牌 ✧';
+  document.getElementById('shuffle-btn').style.display = 'none';
+
+  // Add draw button
+  let drawBtn = document.getElementById('draw-btn');
+  if (!drawBtn) {
+    drawBtn = document.createElement('button');
+    drawBtn.id = 'draw-btn';
+    drawBtn.className = 'mystic-btn';
+    drawBtn.textContent = '✧ 开 始 抽 牌 ✧';
+    drawBtn.onclick = openQuestionModal;
+    drawBtn.style.marginTop = '10px';
+    document.getElementById('main-stage').insertBefore(drawBtn, document.getElementById('card-stage'));
+  } else {
+    drawBtn.style.display = 'inline-block';
+  }
+
+  // Display fan
+  displayFan();
+}
+
+function displayFan() {
+  const stage = document.getElementById('card-stage');
+  stage.innerHTML = '';
+
+  const container = document.createElement('div');
+  container.className = 'fan-container';
+  stage.appendChild(container);
+
+  const totalCards = shuffledDeck.length;
+  const fanAngle = 150; // degrees total spread
+  const radius = 320;
+
+  shuffledDeck.forEach((card, index) => {
+    const cardEl = document.createElement('div');
+    cardEl.className = 'fan-card';
+    cardEl.setAttribute('data-index', index);
+
+    // Calculate fan position
+    const angle = (index / (totalCards - 1)) * fanAngle - fanAngle / 2;
+    const rad = (angle - 90) * (Math.PI / 180); // adjust so center is at top
+    const x = Math.cos(rad) * radius;
+    const y = Math.sin(rad) * radius;
+    const rotation = angle;
+
+    cardEl.style.cssText = `
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rotation}deg);
+      z-index: ${index};
+      opacity: 0;
+      transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    `;
+
+    cardEl.innerHTML = `
+      <div class="fan-card-inner">
+        <div class="fan-card-back">
+          <div class="card-pattern">🔮</div>
+          <div class="card-stars">✧ ✦ ✧</div>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(cardEl);
+
+    // Staggered entrance
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        cardEl.style.opacity = '1';
+      }, index * 15);
+    });
+  });
+
+  // After all cards appear, reveal fronts (showing upright/reversed status)
+  setTimeout(() => {
+    revealFanCards();
+  }, totalCards * 15 + 500);
+}
+
+function revealFanCards() {
+  const cards = document.querySelectorAll('.fan-card');
+  cards.forEach((cardEl, index) => {
+    setTimeout(() => {
+      const card = shuffledDeck[index];
+      cardEl.innerHTML = `
+        <div class="fan-card-inner" style="transform: rotateY(180deg);">
+          <div class="fan-card-back">
+            <div class="card-pattern">🔮</div>
+          </div>
+          <div class="fan-card-front">
+            <div class="card-symbol">${card.symbol}</div>
+            <div class="card-name-zh">${card.name}</div>
+            <div class="card-name-en">${card.nameEn}</div>
+            <div class="card-orientation ${card.isUpright ? 'upright' : 'reversed'}">
+              ${card.isUpright ? '正位 ↑' : '逆位 ↓'}
+            </div>
+          </div>
+        </div>
+      `;
+    }, index * 10);
+  });
+}
+
+// ============ QUESTION MODAL ============
+function openQuestionModal() {
+  if (isDrawing) return;
+  document.getElementById('question-input').value = '';
+  document.getElementById('question-modal').classList.add('active');
+  setTimeout(() => document.getElementById('question-input').focus(), 300);
+}
+
+function closeQuestionModal() {
+  document.getElementById('question-modal').classList.remove('active');
+}
+
+function confirmQuestion() {
+  const question = document.getElementById('question-input').value.trim();
+  if (!question) {
+    showToast('请输入您想问的问题 ✦');
+    return;
+  }
+  userQuestion = question;
+  closeQuestionModal();
+  drawThreeCards();
+}
+
+// ============ DRAW 3 CARDS ============
+function drawThreeCards() {
+  if (isDrawing) return;
+  isDrawing = true;
+
+  document.getElementById('draw-btn').style.display = 'none';
+  document.getElementById('help-text').textContent = '✨ 命运正在为您选择三张牌...';
+
+  // Take first 3 cards from shuffled deck
+  drawnCards = shuffledDeck.splice(0, 3);
+
+  // Dissolve all fan cards
+  const allFanCards = document.querySelectorAll('.fan-card');
+  allFanCards.forEach((cardEl, index) => {
+    if (index < 3) {
+      // Selected cards: animate to center
+      cardEl.style.transition = 'all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      cardEl.style.transform = 'translate(-50%, -50%) translate(0px, -80px) scale(1.3)';
+      cardEl.style.zIndex = '100';
+    } else {
+      // Rest: dissolve
+      setTimeout(() => {
+        cardEl.classList.add('dissolving');
+      }, index * 5);
+    }
+  });
+
+  // After dissolve animation, show selected cards
+  setTimeout(() => {
+    document.getElementById('card-stage').style.display = 'none';
+    displaySelectedCards();
+    isDrawing = false;
+  }, 1200);
+}
+
+function displaySelectedCards() {
+  const area = document.getElementById('selected-cards-area');
+  area.innerHTML = '';
+
+  document.getElementById('help-text').textContent = '🃏 请从左到右依次点击翻开卡牌';
+
+  drawnCards.forEach((card, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'column';
+    wrapper.style.alignItems = 'center';
+
+    const cardEl = document.createElement('div');
+    cardEl.className = 'draw-card';
+    cardEl.setAttribute('data-draw-index', index);
+    cardEl.onclick = function() { flipCard(this, index); };
+
+    cardEl.innerHTML = `
+      <div class="card-inner">
+        <div class="card-face card-back">🔮</div>
+        <div class="card-face card-front-face">
+          <div class="card-symbol">${card.symbol}</div>
+          <div class="card-name-zh">${card.name}</div>
+          <div class="card-name-en">${card.nameEn}</div>
+          <div class="card-orientation ${card.isUpright ? 'upright' : 'reversed'}">
+            ${card.isUpright ? '正位 ↑' : '逆位 ↓'}
+          </div>
+        </div>
+      </div>
+    `;
+
+    const label = document.createElement('div');
+    label.className = 'card-label';
+    label.textContent = ['过去', '现在', '未来'][index];
+
+    wrapper.appendChild(cardEl);
+    wrapper.appendChild(label);
+    area.appendChild(wrapper);
+  });
+
+  // Animate entrance
+  area.style.opacity = '0';
+  requestAnimationFrame(() => {
+    area.style.transition = 'opacity 0.8s';
+    area.style.opacity = '1';
+  });
+}
+
+function flipCard(cardEl, index) {
+  // Only allow flipping left to right
+  if (index !== flippedCount) {
+    showToast(`请先翻开第 ${flippedCount + 1} 张牌 ✦`);
+    return;
+  }
+
+  cardEl.classList.add('flipped');
+  flippedCount++;
+
+  // Check if all flipped
+  if (flippedCount === 3) {
+    document.getElementById('help-text').textContent = '✨ 解读正在生成中...';
+    setTimeout(generateReading, 1000);
+  }
+
+  // Update help text
+  if (flippedCount === 1) {
+    document.getElementById('help-text').textContent = '🃏 第1张代表「过去」· 请翻开第二张（现在）';
+  } else if (flippedCount === 2) {
+    document.getElementById('help-text').textContent = '🃏 第2张代表「现在」· 请翻开最后一张（未来）';
+  }
+}
+
+// ============ READING GENERATION ============
+function generateReading() {
+  const panel = document.getElementById('reading-panel');
+  const [past, present, future] = drawnCards;
+
+  // Build interpretation
+  const pastReading = past.isUpright ? past.upright.meaning : past.reversed.meaning;
+  const presentReading = present.isUpright ? present.upright.meaning : present.reversed.meaning;
+  const futureReading = future.isUpright ? future.upright.meaning : future.reversed.meaning;
+
+  const pastKeywords = past.isUpright ? past.upright.keywords.join('、') : past.reversed.keywords.join('、');
+  const presentKeywords = present.isUpright ? present.upright.keywords.join('、') : present.reversed.keywords.join('、');
+  const futureKeywords = future.isUpright ? future.upright.keywords.join('、') : future.reversed.keywords.join('、');
+
+  // Determine overall tone
+  const uprightCount = drawnCards.filter(c => c.isUpright).length;
+  let overallTone = '';
+  if (uprightCount >= 2) {
+    overallTone = '整体来看，牌面呈现积极的能量。命运对您展露了微笑，关键在于您是否能抓住机遇，顺势而为。三张牌共同描绘了一条充满希望的道路——尽管其中仍有挑战，但您拥有跨越它们的力量。';
+  } else if (uprightCount === 1) {
+    overallTone = '牌面呈现出一种张力——光明与阴影交织。命运并非单面，它既有考验也有祝福。这三张牌共同告诉您：当前的局面虽有挑战，但转机正在酝酿。关键在于您如何看待和应对眼前发生的一切。保持觉知，您将在看似逆境中发现隐藏的礼物。';
+  } else {
+    overallTone = '牌面整体偏向警示的能量。但这并非命运的否定，而是宇宙在提醒您：某些方面需要重新审视和调整。逆位牌并非全是坏消息——它们指出了需要疗愈的伤口和需要放下的包袱。以这三张牌为镜，您将看到自己需要改变的地方，从而找到真正的方向。';
+  }
+
+  // Generate advice based on keywords
+  const allKeywords = [
+    ...(past.isUpright ? past.upright.keywords : past.reversed.keywords),
+    ...(present.isUpright ? present.upright.keywords : present.reversed.keywords),
+    ...(future.isUpright ? future.upright.keywords : future.reversed.keywords)
+  ];
+  const advice = generateAdvice(allKeywords, uprightCount);
+
+  const html = `
+    <div class="reading-section">
+      <h3>✦ 总 览 ✦</h3>
+      <p>关于您的问题「<strong style="color:var(--gold);">${escapeHtml(userQuestion)}</strong>」，命运通过三张塔罗牌给出了回答。</p>
+      <p>${overallTone}</p>
+    </div>
+
+    <div class="reading-divider">—— ✦ ——</div>
+
+    <div class="reading-section">
+      <h3>✦ 分 解 解 读 ✦</h3>
+
+      <div class="card-reading">
+        <div class="card-reading-title">
+          🕯️ 第一张 · 过去 —— ${past.name}（${past.nameEn}）· ${past.isUpright ? '正位 ↑' : '逆位 ↓'}
+        </div>
+        <p style="font-size:13px;color:var(--text-muted);">关键词：${pastKeywords}</p>
+        <p>${pastReading}</p>
+      </div>
+
+      <div class="card-reading">
+        <div class="card-reading-title">
+          🌙 第二张 · 现在 —— ${present.name}（${present.nameEn}）· ${present.isUpright ? '正位 ↑' : '逆位 ↓'}
+        </div>
+        <p style="font-size:13px;color:var(--text-muted);">关键词：${presentKeywords}</p>
+        <p>${presentReading}</p>
+      </div>
+
+      <div class="card-reading">
+        <div class="card-reading-title">
+          ⭐ 第三张 · 未来 —— ${future.name}（${future.nameEn}）· ${future.isUpright ? '正位 ↑' : '逆位 ↓'}
+        </div>
+        <p style="font-size:13px;color:var(--text-muted);">关键词：${futureKeywords}</p>
+        <p>${futureReading}</p>
+      </div>
+    </div>
+
+    <div class="reading-divider">—— ✦ ——</div>
+
+    <div class="reading-section">
+      <h3>✦ 建 议 ✦</h3>
+      <div class="advice-section">
+        <p style="text-indent:0;">${advice}</p>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:30px;">
+      <button class="mystic-btn" style="font-size:14px;padding:10px 30px;" onclick="resetReading()">
+        ✧ 再 问 一 次 ✧
+      </button>
+    </div>
+  `;
+
+  panel.innerHTML = html;
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  document.getElementById('help-text').textContent = '✨ 解读完成 · 愿命运指引您前行';
+}
+
+function generateAdvice(keywords, uprightCount) {
+  const adviceTemplates = [
+    '跟随您内心的声音，不要被外界嘈杂的意见淹没。真正的答案早已存在于您的心中，塔罗牌只是为您映照出它的轮廓。相信自己，勇敢地迈出第一步——命运从不辜负真诚的灵魂。',
+    '保持耐心，宇宙自有它的时间表。您所经历的一切——无论是喜悦还是挑战——都是通往更高自我的必经之路。请以温柔和慈悲对待自己，给予自己足够的时间来成长和蜕变。',
+    '勇敢地面对即将到来的改变。改变或许令人不安，但它是成长的唯一途径。请相信，放手旧的才能迎接新的。在这个转折点上，您的勇气将决定未来的走向。',
+    '在行动与等待之间找到平衡。不是每一个问题都需要立即的答案，有时候时间本身就能给出最好的回应。请继续积累力量，准备在恰当的时机发力。',
+    '请记住：您比任何卡牌都更了解自己。塔罗牌是镜子而非命运——它映照出您内心的智慧，而非外部不可更改的宿命。将解读作为参考，而非绝对的预言。您的自由意志永远拥有最强大的力量。'
+  ];
+
+  // Select advice based on card patterns
+  if (keywords.some(k => ['开始', '新机遇', '新创意', '新感情', '冒险'].includes(k))) {
+    return adviceTemplates[0];
+  } else if (keywords.some(k => ['等待', '耐心', '休息', '过渡'].includes(k))) {
+    return adviceTemplates[1];
+  } else if (keywords.some(k => ['改变', '转变', '结束', '重生', '崩塌'].includes(k))) {
+    return adviceTemplates[2];
+  } else if (keywords.some(k => ['平衡', '调和', '节制', '评估'].includes(k))) {
+    return adviceTemplates[3];
+  }
+  return adviceTemplates[4];
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function resetReading() {
+  document.getElementById('reading-panel').classList.remove('visible');
+  document.getElementById('reading-panel').innerHTML = '';
+  document.getElementById('selected-cards-area').innerHTML = '';
+  document.getElementById('card-stage').style.display = '';
+  document.getElementById('card-stage').innerHTML = '';
+  document.getElementById('help-text').textContent = '点击下方按钮，开始您的塔罗之旅';
+  document.getElementById('shuffle-btn').style.display = 'inline-block';
+  document.getElementById('shuffle-btn').disabled = false;
+  document.getElementById('shuffle-btn').textContent = '✧ 开 始 洗 牌 ✧';
+  const drawBtn = document.getElementById('draw-btn');
+  if (drawBtn) drawBtn.style.display = 'none';
+  drawnCards = [];
+  shuffledDeck = [];
+  flippedCount = 0;
+  userQuestion = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============ VISITOR COUNTING ============
+async function recordVisit() {
+  try {
+    const resp = await fetch('/api/visit', { method: 'POST' });
+    const data = await resp.json();
+    visitorCount = data.totalVisitors;
+  } catch (e) {
+    // Fallback: use localStorage for local file usage
+    let count = parseInt(localStorage.getItem('tarot_visitor_count') || '0');
+    count++;
+    localStorage.setItem('tarot_visitor_count', count.toString());
+    visitorCount = count;
+  }
+}
+
+// ============ KEYBOARD SHORTCUTS ============
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeAdminModal();
+    closeQuestionModal();
+  }
+});
+
+// ============ INIT ============
+window.addEventListener('DOMContentLoaded', () => {
+  initParticles();
+  initSplash();
+  recordVisit();
+});
+</script>
+</body>
+</html>
